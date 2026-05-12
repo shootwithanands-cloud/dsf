@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shoot with Anand | Premium Photography Portfolio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,600&family=Inter:wght@100;200;300;400;500;600;700&display=swap');
+        
+        :root {
+            --gold: #d4af37;
+            --dark: #0a0a0a;
+        }
+        body {
+            background-color: var(--dark);
+            color: white;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+        .font-display { font-family: 'Cormorant Garamond', serif; }
+        .text-gold { color: var(--gold); }
+        .bg-gold { background-color: var(--gold); }
+        .border-gold { border-color: var(--gold); }
+        
+        .noise-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0.05;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+
+        .glass-ultra {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: var(--dark); }
+        ::-webkit-scrollbar-thumb { background: var(--gold); }
+    </style>
+    
+    <!-- React, ReactDOM, Framer Motion, Babel -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/framer-motion@11.0.8/dist/framer-motion.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // --- DATA (exact match from WorkGallery.jsx) ---
+        const weddingImages = [
+            { id: 'wedding-1', url: 'wedding-1.jpg', thumb: 'wedding-1.jpg' },
+            { id: 'wedding-2', url: 'wedding-2.jpg', thumb: 'wedding-2.jpg' },
+            { id: 'wedding-3', url: 'wedding-3.jpg', thumb: 'wedding-3.jpg' },
+            { id: 'wedding-4', url: 'wedding-4.jpg', thumb: 'wedding-4.jpg' },
+            { id: 'wedding-5', url: 'wedding-5.jpg', thumb: 'wedding-5.jpg' },
+            { id: 'portrait-1', url: 'portrait-1.jpg', thumb: 'portrait-1.jpg' },
+            { id: 'portrait-2', url: 'portrait-2.jpg', thumb: 'portrait-2.jpg' },
+            { id: 'portrait-3', url: 'portrait-3.jpg', thumb: 'portrait-3.jpg' },
+            { id: 'portrait-4', url: 'portrait-4.jpg', thumb: 'portrait-4.jpg' },
+            { id: 'portrait-5', url: 'portrait-5.jpg', thumb: 'portrait-5.jpg' }
+        ];
+
+        const fashionImages = [
+            { id: 'fashion-1', url: 'https://i.ibb.co/N6QGfW51/DSC-0150.jpg', thumb: 'https://i.ibb.co/N6QGfW51/DSC-0150.jpg' },
+            { id: 'fashion-2', url: 'https://i.ibb.co/n81hwkzr/DSC-0124.jpg', thumb: 'https://i.ibb.co/n81hwkzr/DSC-0124.jpg' },
+            { id: 'fashion-3', url: 'https://i.ibb.co/yc6ry611/IMG-0333.jpg', thumb: 'https://i.ibb.co/yc6ry611/IMG-0333.jpg' },
+            { id: 'fashion-4', url: 'https://i.ibb.co/PvDpP9kd/IMG-0340.jpg', thumb: 'https://i.ibb.co/PvDpP9kd/IMG-0340.jpg' },
+            { id: 'fashion-5', url: 'https://i.ibb.co/qYK18CWm/IMG-0880.jpg', thumb: 'https://i.ibb.co/qYK18CWm/IMG-0880.jpg' },
+            { id: 'fashion-6', url: 'https://i.ibb.co/nMMT2pXk/IMG-0882-JPEG-1.jpg', thumb: 'https://i.ibb.co/nMMT2pXk/IMG-0882-JPEG-1.jpg' },
+            { id: 'fashion-7', url: 'https://i.ibb.co/TxgtnttL/IMG-0888-PG.jpg', thumb: 'https://i.ibb.co/TxgtnttL/IMG-0888-PG.jpg' },
+            { id: 'fashion-8', url: 'https://i.ibb.co/zjJNdJy/JPGE.jpg', thumb: 'https://i.ibb.co/zjJNdJy/JPGE.jpg' }
+        ];
+
+        const portraitImages = [
+            { id: 'new-portrait-1', url: 'new-portrait-1.jpg', thumb: 'new-portrait-1.jpg' },
+            { id: 'new-portrait-2', url: 'new-portrait-2.jpg', thumb: 'new-portrait-2.jpg' },
+            { id: 'new-portrait-3', url: 'new-portrait-3.jpg', thumb: 'new-portrait-3.jpg' },
+            { id: 'new-portrait-4', url: 'new-portrait-4.jpg', thumb: 'new-portrait-4.jpg' }
+        ];
+
+        const natureImages = [
+            { id: 'nature-1', url: 'nature-1.jpg', thumb: 'nature-1.jpg' },
+            { id: 'nature-2', url: 'nature-2.jpg', thumb: 'nature-2.jpg' },
+            { id: 'nature-3', url: 'nature-3.jpg', thumb: 'nature-3.jpg' },
+            { id: 'nature-4', url: 'nature-4.jpg', thumb: 'nature-4.jpg' },
+            { id: 'nature-5', url: 'nature-5.jpg', thumb: 'nature-5.jpg' },
+            { id: 'nature-6', url: 'nature-6.jpg', thumb: 'nature-6.jpg' },
+            { id: 'nature-7', url: 'nature-7.jpg', thumb: 'nature-7.jpg' },
+            { id: 'nature-8', url: 'nature-8.jpg', thumb: 'nature-8.jpg' }
+        ];
+
+        const wildlifeImages = [
+            { id: 'wildlife-1', url: 'wildlife-1.jpg', thumb: 'wildlife-1.jpg' },
+            { id: 'wildlife-2', url: 'wildlife-2.jpg', thumb: 'wildlife-2.jpg' },
+            { id: 'wildlife-3', url: 'wildlife-3.jpg', thumb: 'wildlife-3.jpg' },
+            { id: 'wildlife-4', url: 'wildlife-4.jpg', thumb: 'wildlife-4.jpg' },
+            { id: 'wildlife-5', url: 'wildlife-5.jpg', thumb: 'wildlife-5.jpg' }
+        ];
+
+        const streetImages = [
+            { id: 'street-1', url: 'street-1.jpg', thumb: 'street-1.jpg' },
+            { id: 'street-2', url: 'street-2.jpg', thumb: 'street-2.jpg' },
+            { id: 'street-3', url: 'street-3.jpg', thumb: 'street-3.jpg' },
+            { id: 'street-4', url: 'street-4.jpg', thumb: 'street-4.jpg' }
+        ];
+
+        const travelImages = [
+            { id: 'travel-1', url: 'travel-1.jpg', thumb: 'travel-1.jpg' },
+            { id: 'travel-2', url: 'travel-2.jpg', thumb: 'travel-2.jpg' },
+            { id: 'travel-3', url: 'travel-3.jpg', thumb: 'travel-3.jpg' },
+            { id: 'travel-4', url: 'travel-4.jpg', thumb: 'travel-4.jpg' },
+            { id: 'travel-5', url: 'travel-5.jpg', thumb: 'travel-5.jpg' }
+        ];
+
+        const eventsImages = [
+            { id: 'event-1', url: 'event-1.jpg', thumb: 'event-1.jpg' },
+            { id: 'event-2', url: 'event-2.jpg', thumb: 'event-2.jpg' },
+            { id: 'event-3', url: 'event-3.jpg', thumb: 'event-3.jpg' },
+            { id: 'event-4', url: 'event-4.jpg', thumb: 'event-4.jpg' }
+        ];
+
+        const productImages = [
+            { id: 'product-1', url: 'new-product-1.jpg', thumb: 'new-product-1.jpg' },
+            { id: 'product-2', url: 'new-product-2.jpg', thumb: 'new-product-2.jpg' },
+            { id: 'product-3', url: 'new-product-3.jpg', thumb: 'new-product-3.jpg' },
+            { id: 'product-4', url: 'new-product-4.jpg', thumb: 'new-product-4.jpg' }
+        ];
+
+        const cinematicImages = [
+            { id: 'cinematic-1', url: 'cinematic-1.jpg', thumb: 'cinematic-1.jpg' },
+            { id: 'cinematic-2', url: 'cinematic-2.jpg', thumb: 'cinematic-2.jpg' }
+        ];
+
+        // Exact mapping from WorkGallery.jsx
+        const categories = [
+            { id: 'wedding',   name: 'Female',           images: weddingImages, coverIndex: 6 },
+            { id: 'portrait',  name: 'Portrait',         images: portraitImages },
+            { id: 'fashion',   name: 'Male',             images: fashionImages },
+            { id: 'nature',    name: 'Wildlife',         images: natureImages },
+            { id: 'wildlife',  name: 'Child',            images: wildlifeImages },
+            { id: 'street',    name: 'Photo Walks',      images: streetImages },
+            { id: 'travel',    name: 'Lightrates',       images: travelImages },
+            { id: 'events',    name: 'Food',             images: eventsImages },
+            { id: 'product',   name: 'Fruit & Vegetable',images: productImages },
+            { id: 'cinematic', name: 'Macro',            images: cinematicImages }
+        ];
+
+        // --- COMPONENTS ---
+
+        const IntroScreen = () => {
+            const { motion } = window.Motion;
+            return (
+                <motion.div
+                    className="fixed inset-0 z-[200] bg-black flex items-center justify-center overflow-hidden"
+                    exit={{ opacity: 0, scale: 1.1, filter: "blur(20px)", transition: { duration: 1.2 } }}
+                >
+                    <div className="text-center relative z-10">
+                        <motion.h1 
+                            initial={{ y: 20, opacity: 0 }}
+                            animate={{ y: 0, opacity: 1 }}
+                            transition={{ duration: 1, delay: 0.5 }}
+                            className="text-5xl md:text-7xl font-display italic text-gold"
+                        >
+                            Shoot with Anand
+                        </motion.h1>
+                        <motion.div initial={{ width: 0 }} animate={{ width: 100 }} className="h-[1px] bg-gold mx-auto mt-8" />
+                    </div>
+                </motion.div>
+            );
+        };
+
+        const Navbar = ({ setCurrentPage, currentPage }) => {
+            const { motion } = window.Motion;
+            return (
+                <nav className="fixed top-0 left-0 right-0 z-50 py-8 bg-gradient-to-b from-black/80 to-transparent">
+                    <div className="container mx-auto px-6 flex justify-between items-center">
+                        <button onClick={() => setCurrentPage('home')} className="text-2xl font-display font-bold text-white outline-none">
+                            Shoot with <span className="text-gold">Anand</span>
+                        </button>
+                        <div className="flex space-x-8">
+                            {['Home', 'About', 'Diploma', 'Contact'].map(item => (
+                                <button 
+                                    key={item} 
+                                    onClick={() => setCurrentPage(item.toLowerCase())} 
+                                    className={`text-xs uppercase tracking-widest font-medium transition-colors hover:text-gold outline-none ${currentPage === item.toLowerCase() ? 'text-gold' : 'text-white/70'}`}
+                                >
+                                    {item}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                </nav>
+            );
+        };
+
+        const WorkGallery = () => {
+            const { motion, AnimatePresence } = window.Motion;
+            const [activeCategory, setActiveCategory] = useState(null);
+            const [activeImageIndex, setActiveImageIndex] = useState(0);
+            const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+
+            const openLightbox = (idx) => { setActiveImageIndex(idx); setIsLightboxOpen(true); };
+
+            return (
+                <section className="py-32 bg-black" id="gallery">
+                    <div className="container mx-auto px-6">
+                        <div className="mb-20 text-center">
+                            <motion.h2 initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} className="text-gold uppercase tracking-[0.4em] text-xs mb-4">Portfolio</motion.h2>
+                            <motion.h3 initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} className="text-5xl font-display text-white">Categories</motion.h3>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                            {categories.map((cat, idx) => (
+                                <motion.div
+                                    key={cat.id}
+                                    whileHover={{ scale: 1.05, rotateY: 10, rotateX: -5 }}
+                                    style={{ transformStyle: "preserve-3d", perspective: "1000px" }}
+                                    onClick={() => setActiveCategory(cat)}
+                                    className="relative aspect-[4/5] rounded-xl overflow-hidden group cursor-pointer glass-ultra shadow-2xl"
+                                >
+                                    <img src={cat.images[cat.coverIndex || 0].thumb} className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:opacity-100 group-hover:scale-110 transition-all duration-700" />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex items-end p-6">
+                                        <h4 className="text-xl font-display text-white uppercase tracking-widest leading-none">{cat.name}</h4>
+                                    </div>
+                                </motion.div>
+                            ))}
+                        </div>
+                    </div>
+                    
+                    <AnimatePresence>
+                        {activeCategory && !isLightboxOpen && (
+                            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[110] bg-black overflow-y-auto p-12 pt-32">
+                                <button onClick={() => setActiveCategory(null)} className="fixed top-8 right-8 text-white z-[120] text-4xl">&times;</button>
+                                <h2 className="text-5xl font-display font-bold text-white mb-16 uppercase tracking-widest text-center">{activeCategory.name}</h2>
+                                <div className="columns-1 md:columns-3 lg:columns-4 gap-6 space-y-6 max-w-7xl mx-auto">
+                                    {activeCategory.images.map((img, idx) => (
+                                        <motion.img 
+                                            key={idx} 
+                                            src={img.thumb} 
+                                            onClick={() => openLightbox(idx)} 
+                                            whileHover={{ scale: 1.02 }}
+                                            className="w-full rounded-xl cursor-pointer shadow-2xl hover:brightness-110 transition-all" 
+                                        />
+                                    ))}
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+
+                    <AnimatePresence>
+                        {isLightboxOpen && activeCategory && (
+                            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[130] bg-black/95 backdrop-blur-2xl flex items-center justify-center p-4" onClick={() => setIsLightboxOpen(false)}>
+                                <button className="absolute top-8 right-8 text-white text-5xl">&times;</button>
+                                <motion.img 
+                                    initial={{ scale: 0.9, opacity: 0 }} 
+                                    animate={{ scale: 1, opacity: 1 }}
+                                    src={activeCategory.images[activeImageIndex].url} 
+                                    className="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl" 
+                                />
+                                <div className="absolute bottom-8 text-white/50 tracking-[0.2em] uppercase text-xs">{activeImageIndex + 1} / {activeCategory.images.length}</div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </section>
+            );
+        };
+
+        const HomePage = ({ setCurrentPage }) => {
+            const { motion, useMotionValue, useSpring, useTransform } = window.Motion;
+            const containerRef = useRef(null);
+            const mouseX = useMotionValue(0);
+            const mouseY = useMotionValue(0);
+            const springX = useSpring(mouseX, { stiffness: 40, damping: 20 });
+            const springY = useSpring(mouseY, { stiffness: 40, damping: 20 });
+            
+            const rotateX = useTransform(springY, [-0.5, 0.5], [10, -10]);
+            const rotateY = useTransform(springX, [-0.5, 0.5], [-10, 10]);
+            const translateX = useTransform(springX, [-0.5, 0.5], [-20, 20]);
+            const translateY = useTransform(springY, [-0.5, 0.5], [-20, 20]);
+
+            const handleMouseMove = (e) => {
+                const rect = containerRef.current?.getBoundingClientRect();
+                if (rect) {
+                    mouseX.set((e.clientX - rect.left) / rect.width - 0.5);
+                    mouseY.set((e.clientY - rect.top) / rect.height - 0.5);
+                }
+            };
+
+            return (
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                    <section 
+                        ref={containerRef}
+                        onMouseMove={handleMouseMove}
+                        className="relative h-screen w-full flex items-center justify-center bg-black overflow-hidden"
+                    >
+                        <motion.div style={{ x: translateX, y: translateY }} className="absolute inset-0 opacity-40">
+                            <img src="squirrel2.jpg" className="w-full h-full object-cover scale-110" />
+                        </motion.div>
+                        
+                        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/60 z-10" />
+                        
+                        <motion.div 
+                            style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
+                            className="relative z-20 text-center px-6"
+                        >
+                            <motion.h1 
+                                style={{ translateZ: 120 }}
+                                className="text-6xl md:text-[10rem] font-display italic text-white mb-8 leading-tight"
+                            >
+                                <span className="block opacity-90 drop-shadow-2xl">Shoot with</span>
+                                <span className="block text-gold drop-shadow-[0_0_60px_rgba(212,175,55,0.4)]">Anand</span>
+                            </motion.h1>
+                            <motion.p style={{ translateZ: 60 }} className="text-white/50 uppercase tracking-[0.8em] text-[10px] md:text-sm mb-16">
+                                Capturing Emotions Through Every Frame
+                            </motion.p>
+                            <div className="flex flex-col sm:flex-row gap-8 justify-center items-center" style={{ translateZ: 40 }}>
+                                <button onClick={() => document.getElementById('gallery').scrollIntoView({ behavior: 'smooth' })} className="px-16 py-6 bg-white text-black text-[10px] font-bold uppercase tracking-[0.3em] rounded-full hover:bg-gold transition-all duration-500 shadow-2xl">
+                                    Explore Portfolio
+                                </button>
+                                <button onClick={() => setCurrentPage('diploma')} className="px-16 py-6 border border-white/20 text-white text-[10px] font-bold uppercase tracking-[0.3em] rounded-full glass-ultra hover:bg-white/10 transition-all duration-500">
+                                    View Diploma
+                                </button>
+                            </div>
+                        </motion.div>
+                    </section>
+                    <WorkGallery />
+                </motion.div>
+            );
+        };
+
+        const AboutPage = () => {
+            const { motion } = window.Motion;
+            return (
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="pt-48 pb-24 min-h-screen">
+                    <div className="container mx-auto px-6">
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-24 items-center">
+                            <motion.div 
+                                initial={{ opacity: 0, x: -50 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                className="aspect-[3/4] rounded-[3rem] overflow-hidden glass-ultra p-6"
+                            >
+                                <img src="about-photo.jpg" className="w-full h-full object-cover rounded-[2rem]" />
+                            </motion.div>
+                            <div>
+                                <motion.h2 initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-gold uppercase tracking-[0.6em] text-[10px] mb-8">Creative Vision</motion.h2>
+                                <motion.h1 initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="text-6xl md:text-[6rem] font-display text-white mb-12 italic leading-tight">Deepanshu Anand</motion.h1>
+                                <div className="space-y-8 text-white/50 text-xl leading-relaxed font-light">
+                                    <p>To me, this art isn't just a profession; it's a way of looking at the most beautiful moments of life.</p>
+                                    <p>I am an 18-year-old artist with 6 months of hands-on experience in capturing frames. I capture stories - real moments, natural emotions, and timeless visuals.</p>
+                                    <p>With a growing understanding of light, composition, and detail, I focus on highlighting the true essence of every subject. Whether it's portraits, events, fashion, or lifestyle, my goal is to create authentic and meaningful visuals.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </motion.div>
+            );
+        };
+
+        const DiplomaPage = () => {
+            const { motion } = window.Motion;
+            return (
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="pt-48 pb-24 min-h-screen flex items-center justify-center">
+                    <div className="text-center px-6">
+                        <motion.h2 initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-gold uppercase tracking-[0.6em] text-[10px] mb-8">Certification</motion.h2>
+                        <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-6xl md:text-[7rem] font-display italic text-white mb-20">Official Diploma</motion.h1>
+                        <motion.div 
+                            whileHover={{ rotateY: 10, rotateX: -5, translateZ: 60, scale: 1.02 }}
+                            className="max-w-5xl mx-auto glass-ultra p-10 rounded-[2rem] shadow-[0_80px_160px_rgba(0,0,0,0.8)] border border-white/5"
+                            style={{ perspective: 1500, transformStyle: "preserve-3d" }}
+                        >
+                            <img src="diploma-main.png" className="w-full h-auto rounded-xl shadow-inner border border-black/50" style={{ translateZ: 30 }} />
+                        </motion.div>
+                        <motion.div 
+                            initial={{ opacity: 0, y: 30 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.3 }}
+                            className="max-w-3xl mx-auto mt-16 p-8 glass-ultra rounded-2xl border border-white/10 relative overflow-hidden"
+                        >
+                            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-gold to-transparent opacity-50"></div>
+                            <p className="text-white/70 text-xl md:text-2xl font-light leading-relaxed italic font-display">
+                                "I hereby declare that every visual in this portfolio has been captured by me. Every frame is an authentic emotion and the result of my creative hard work."
+                            </p>
+                        </motion.div>
+                    </div>
+                </motion.div>
+            );
+        };
+
+        const ContactPage = () => {
+            const { motion } = window.Motion;
+            return (
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="pt-48 pb-24 min-h-screen">
+                    <div className="container mx-auto px-6 text-center">
+                        <motion.h2 initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-gold uppercase tracking-[0.6em] text-[10px] mb-8">Inquiry</motion.h2>
+                        <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-6xl md:text-[6rem] font-display italic text-white mb-24">Let's Create Together</motion.h1>
+                        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-20 text-left">
+                            <motion.div initial={{ opacity: 0, x: -30 }} animate={{ opacity: 1, x: 0 }} className="glass-ultra p-12 rounded-[2.5rem]">
+                                <form className="space-y-10">
+                                    <div className="relative">
+                                        <input className="w-full bg-transparent border-b border-white/10 py-4 focus:border-gold outline-none text-white font-light tracking-widest text-xs" placeholder="NAME" />
+                                    </div>
+                                    <div className="relative">
+                                        <input className="w-full bg-transparent border-b border-white/10 py-4 focus:border-gold outline-none text-white font-light tracking-widest text-xs" placeholder="EMAIL" />
+                                    </div>
+                                    <div className="relative">
+                                        <textarea className="w-full bg-transparent border-b border-white/10 py-4 focus:border-gold outline-none text-white font-light tracking-widest text-xs" placeholder="MESSAGE" rows="3" />
+                                    </div>
+                                    <button className="w-full bg-gold text-black font-bold py-6 uppercase tracking-[0.3em] text-[10px] hover:bg-white transition-all duration-500 rounded-xl shadow-xl">Send Message</button>
+                                </form>
+                            </motion.div>
+                            <motion.div initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} className="flex flex-col justify-center space-y-16 pl-12">
+                                <div>
+                                    <h4 className="text-white/30 text-[10px] uppercase tracking-[0.6em] mb-6">Instagram</h4>
+                                    <a href="https://www.instagram.com/shoot_with_anand?igsh=MTBtY2w2bTByMmF5bg==" target="_blank" className="text-3xl text-white hover:text-gold transition-all duration-500 italic font-display">@shoot_with_anand</a>
+                                </div>
+                                <div>
+                                    <h4 className="text-white/30 text-[10px] uppercase tracking-[0.6em] mb-6">LinkedIn</h4>
+                                    <a href="https://www.linkedin.com/in/deepanshu-anand-386990408?utm_source=share_via&utm_content=profile&utm_medium=member_android" target="_blank" className="text-3xl text-white hover:text-gold transition-all duration-500 italic font-display">Deepanshu Anand</a>
+                                </div>
+                            </motion.div>
+                        </div>
+                    </div>
+                </motion.div>
+            );
+        };
+
+        const App = () => {
+            const [showIntro, setShowIntro] = useState(true);
+            const [currentPage, setCurrentPage] = useState('home');
+            const { AnimatePresence, motion } = window.Motion;
+
+            useEffect(() => {
+                const timer = setTimeout(() => setShowIntro(false), 3000);
+                return () => clearTimeout(timer);
+            }, []);
+
+            return (
+                <div className="min-h-screen bg-[#0a0a0a] text-white selection:bg-gold selection:text-black">
+                    <div className="noise-overlay" />
+                    <AnimatePresence mode="wait">
+                        {showIntro ? <IntroScreen key="intro" /> : (
+                            <motion.div key="main" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                                <Navbar currentPage={currentPage} setCurrentPage={setCurrentPage} />
+                                <AnimatePresence mode="wait">
+                                    {currentPage === 'home' && <HomePage key="home" setCurrentPage={setCurrentPage} />}
+                                    {currentPage === 'about' && <AboutPage key="about" />}
+                                    {currentPage === 'diploma' && <DiplomaPage key="diploma" />}
+                                    {currentPage === 'contact' && <ContactPage key="contact" />}
+                                </AnimatePresence>
+                                <footer className="py-24 border-t border-white/5 text-center bg-black">
+                                    <h2 className="text-3xl font-display font-bold italic mb-6">Shoot with <span className="text-gold">Anand</span></h2>
+                                    <p className="text-white/20 text-[10px] tracking-[0.4em] uppercase">© 2026 Studio Portfolio. Crafted with Precision.</p>
+                                </footer>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
